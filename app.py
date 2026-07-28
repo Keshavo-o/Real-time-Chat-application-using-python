@@ -1,12 +1,4 @@
-"""
-Real-Time Chat Application
-Flask + Flask-SocketIO + Flask-Login + SQLite
 
-Features:
-- User registration & login (authentication)
-- Real-time messaging over WebSockets
-- Persistent chat history stored in SQLite
-"""
 
 from datetime import datetime
 
@@ -19,9 +11,6 @@ from flask_login import (
 from flask_socketio import SocketIO, emit
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# ---------------------------------------------------------------------------
-# App configuration
-# ---------------------------------------------------------------------------
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "change-this-secret-key-in-production"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///chat.db"
@@ -34,9 +23,7 @@ login_manager = LoginManager(app)
 login_manager.login_view = "login"
 
 
-# ---------------------------------------------------------------------------
-# Database Models
-# ---------------------------------------------------------------------------
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -66,11 +53,8 @@ class Message(db.Model):
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+    
 
-
-# ---------------------------------------------------------------------------
-# Auth Routes
-# ---------------------------------------------------------------------------
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -120,18 +104,14 @@ def logout():
     return redirect(url_for("login"))
 
 
-# ---------------------------------------------------------------------------
-# Chat Route
-# ---------------------------------------------------------------------------
+
 @app.route("/")
 @login_required
 def chat():
     return render_template("chat.html", username=current_user.username)
 
 
-# ---------------------------------------------------------------------------
-# SocketIO Events
-# ---------------------------------------------------------------------------
+
 @socketio.on("connect")
 def handle_connect():
     if not current_user.is_authenticated:
@@ -175,9 +155,8 @@ def handle_send_message(data):
     emit("receive_message", message.to_dict(), broadcast=True)
 
 
-# ---------------------------------------------------------------------------
 # Entry point
-# ---------------------------------------------------------------------------
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
